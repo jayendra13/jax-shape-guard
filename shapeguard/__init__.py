@@ -33,8 +33,9 @@ from shapeguard.errors import ShapeGuardError
 from shapeguard.decorator import expects
 from shapeguard.spec import check_shape
 from shapeguard.context import ShapeContext
+from shapeguard.config import config
 
-__version__ = "0.1.0b1"
+__version__ = "0.2.0a1"
 
 __all__ = [
     # Core
@@ -45,6 +46,8 @@ __all__ = [
     "expects",
     "check_shape",
     "ShapeContext",
+    # Configuration
+    "config",
     # Errors
     "ShapeGuardError",
 ]

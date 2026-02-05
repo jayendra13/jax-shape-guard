@@ -64,3 +64,35 @@ def get_array_backend(x: Any) -> str:
         return "torch"
     else:
         return "unknown"
+
+
+def is_jax_tracing() -> bool:
+    """
+    Detect if we're currently inside JAX's JIT tracer.
+
+    Returns:
+        True if JAX is tracing (inside jit, vmap, etc.), False otherwise.
+        Always returns False if JAX is not installed.
+
+    Note:
+        Uses JAX's internal `unsafe_am_i_under_a_jit` function to detect
+        if we're inside a traced context.
+    """
+    try:
+        from jax._src.core import unsafe_am_i_under_a_jit
+        return unsafe_am_i_under_a_jit()
+    except ImportError:
+        # JAX not installed or API changed
+        return False
+    except Exception:
+        # JAX internals changed or other error - assume not tracing
+        return False
+
+
+def is_jax_installed() -> bool:
+    """Check if JAX is available."""
+    try:
+        import jax
+        return True
+    except ImportError:
+        return False
