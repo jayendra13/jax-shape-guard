@@ -28,8 +28,7 @@ def get_shape(x: Any) -> tuple[int, ...]:
     """
     if not hasattr(x, "shape"):
         raise TypeError(
-            f"Cannot get shape from {type(x).__name__!r}: "
-            f"object has no 'shape' attribute"
+            f"Cannot get shape from {type(x).__name__!r}: object has no 'shape' attribute"
         )
 
     # Convert to tuple of ints to handle JAX's traced shapes
@@ -80,6 +79,7 @@ def is_jax_tracing() -> bool:
     """
     try:
         from jax._src.core import unsafe_am_i_under_a_jit
+
         return unsafe_am_i_under_a_jit()
     except ImportError:
         # JAX not installed or API changed

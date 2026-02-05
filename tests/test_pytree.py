@@ -37,10 +37,12 @@ class TestPyTreeSpecs:
         def f(params):
             return params["layer1"]["w"].shape
 
-        result = f({
-            "layer1": {"w": np_array((5, 8)), "b": np_array((8,))},
-            "layer2": {"w": np_array((8, 10)), "b": np_array((10,))},
-        })
+        result = f(
+            {
+                "layer1": {"w": np_array((5, 8)), "b": np_array((8,))},
+                "layer2": {"w": np_array((8, 10)), "b": np_array((10,))},
+            }
+        )
         assert result == (5, 8)
 
     @requires_numpy
@@ -53,10 +55,7 @@ class TestPyTreeSpecs:
             return x @ params["w"]
 
         # n=3, m=4 should unify
-        result = f(
-            {"w": np_array((3, 4)), "b": np_array((4,))},
-            np_array((3,))
-        )
+        result = f({"w": np_array((3, 4)), "b": np_array((4,))}, np_array((3,)))
         assert result.shape == (4,)
 
     @requires_numpy
@@ -109,19 +108,11 @@ class TestPyTreeSpecs:
         """Can mix dict specs and array specs."""
         n, m = Dim("n"), Dim("m")
 
-        @expects(
-            params={"w": (n, m)},
-            x=(n,),
-            y=(m,)
-        )
+        @expects(params={"w": (n, m)}, x=(n,), y=(m,))
         def f(params, x, y):
             return x @ params["w"] + y
 
-        result = f(
-            {"w": np_array((3, 4))},
-            np_array((3,)),
-            np_array((4,))
-        )
+        result = f({"w": np_array((3, 4))}, np_array((3,)), np_array((4,)))
         assert result.shape == (4,)
 
     @requires_numpy
@@ -156,13 +147,15 @@ class TestPyTreeSpecs:
         def f(model):
             return model["encoder"]["layer0"]["w"].shape
 
-        result = f({
-            "encoder": {
-                "layer0": {"w": np_array((10, 64))},
-                "layer1": {"w": np_array((64, 64))},
-            },
-            "decoder": {
-                "layer0": {"w": np_array((64, 10))},  # n=10 must match
-            },
-        })
+        result = f(
+            {
+                "encoder": {
+                    "layer0": {"w": np_array((10, 64))},
+                    "layer1": {"w": np_array((64, 64))},
+                },
+                "decoder": {
+                    "layer0": {"w": np_array((64, 10))},  # n=10 must match
+                },
+            }
+        )
         assert result == (10, 64)

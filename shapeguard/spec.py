@@ -31,10 +31,7 @@ def _split_ellipsis_spec(spec: ShapeSpec) -> tuple[ShapeSpec, ShapeSpec]:
 
     Raises ValueError if more than one ellipsis.
     """
-    ellipsis_indices = [
-        i for i, s in enumerate(spec)
-        if s is ... or isinstance(s, _EllipsisType)
-    ]
+    ellipsis_indices = [i for i, s in enumerate(spec) if s is ... or isinstance(s, _EllipsisType)]
 
     if len(ellipsis_indices) > 1:
         raise ValueError("Shape spec cannot contain more than one ellipsis")
@@ -43,7 +40,7 @@ def _split_ellipsis_spec(spec: ShapeSpec) -> tuple[ShapeSpec, ShapeSpec]:
         return spec, ()
 
     idx = ellipsis_indices[0]
-    return spec[:idx], spec[idx + 1:]
+    return spec[:idx], spec[idx + 1 :]
 
 
 def match_shape(

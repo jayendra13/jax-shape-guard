@@ -85,10 +85,7 @@ class ShapeContext:
 
         Useful for inspecting what values dimensions were bound to.
         """
-        return {
-            dim.name: binding.value
-            for dim, binding in self._ctx.bindings.items()
-        }
+        return {dim.name: binding.value for dim, binding in self._ctx.bindings.items()}
 
     def resolve(self, dim: Any) -> int | None:
         """

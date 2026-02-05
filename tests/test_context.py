@@ -62,9 +62,7 @@ class TestShapeContext:
         n, m, k = Dim("n"), Dim("m"), Dim("k")
 
         ctx = (
-            ShapeContext()
-            .check(np_array((3, 4)), (n, m), "x")
-            .check(np_array((4, 5)), (m, k), "y")
+            ShapeContext().check(np_array((3, 4)), (n, m), "x").check(np_array((4, 5)), (m, k), "y")
         )
 
         assert ctx.bindings == {"n": 3, "m": 4, "k": 5}

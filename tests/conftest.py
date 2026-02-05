@@ -7,6 +7,7 @@ import pytest
 # Try to import numpy, skip tests if not available
 try:
     import numpy as np
+
     HAS_NUMPY = True
 except ImportError:
     HAS_NUMPY = False
@@ -14,6 +15,7 @@ except ImportError:
 # Try to import jax, skip tests if not available
 try:
     import jax.numpy as jnp
+
     HAS_JAX = True
 except ImportError:
     HAS_JAX = False

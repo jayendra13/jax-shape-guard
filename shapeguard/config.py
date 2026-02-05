@@ -40,9 +40,7 @@ class Config:
         """Set JIT mode with validation."""
         valid_modes = ("check", "warn", "skip")
         if value not in valid_modes:
-            raise ValueError(
-                f"Invalid jit_mode: {value!r}. Must be one of: {valid_modes}"
-            )
+            raise ValueError(f"Invalid jit_mode: {value!r}. Must be one of: {valid_modes}")
         self._jit_mode = value
 
     def __repr__(self) -> str:

@@ -79,8 +79,7 @@ def _check_pytree(
 
     else:
         raise TypeError(
-            f"Invalid spec for {source}: {spec!r}. "
-            f"Expected tuple (shape) or dict (pytree)."
+            f"Invalid spec for {source}: {spec!r}. Expected tuple (shape) or dict (pytree)."
         )
 
 
