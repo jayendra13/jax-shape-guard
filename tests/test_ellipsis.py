@@ -4,10 +4,10 @@ Tests for ellipsis support in shape specs.
 
 import pytest
 
-from shapeguard import Dim, expects, check_shape
+from shapeguard import Dim, check_shape, expects
 from shapeguard.core import ELLIPSIS
+from shapeguard.errors import DimensionMismatchError, RankMismatchError, UnificationError
 from shapeguard.spec import format_spec
-from shapeguard.errors import RankMismatchError, DimensionMismatchError, UnificationError
 from tests.conftest import requires_numpy
 
 

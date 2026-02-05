@@ -7,14 +7,14 @@ from __future__ import annotations
 import functools
 import inspect
 import logging
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
-from shapeguard.core import UnificationContext
-from shapeguard.spec import ShapeSpec, match_shape
-from shapeguard.errors import ShapeGuardError
 from shapeguard._compat import get_shape, is_array, is_jax_tracing
 from shapeguard.config import JitMode, config
-
+from shapeguard.core import UnificationContext
+from shapeguard.errors import ShapeGuardError
+from shapeguard.spec import ShapeSpec, match_shape
 
 F = TypeVar("F", bound=Callable[..., Any])
 

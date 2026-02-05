@@ -6,10 +6,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from shapeguard.core import UnificationContext
-from shapeguard.spec import ShapeSpec, match_shape
-from shapeguard.errors import ShapeGuardError
 from shapeguard._compat import get_shape
+from shapeguard.core import UnificationContext
+from shapeguard.errors import ShapeGuardError
+from shapeguard.spec import ShapeSpec, match_shape
 
 
 class ShapeContext:

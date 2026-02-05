@@ -6,14 +6,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from shapeguard.core import Dim, UnificationContext, ELLIPSIS, _EllipsisType
+from shapeguard._compat import get_shape
+from shapeguard.core import Dim, UnificationContext, _EllipsisType
 from shapeguard.errors import (
     DimensionMismatchError,
     RankMismatchError,
     ShapeGuardError,
 )
-from shapeguard._compat import get_shape
-
 
 # Type alias for shape specifications
 # Each element can be: int (exact match), Dim (symbolic), None (wildcard),

@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "Jay" }
+    { name = "Jayendra Parmar", email = "jayendra0parmar@gmail.com" }
 ]
 keywords = ["numpy", "jax", "shapes", "validation", "debugging", "ml"]
 classifiers = [
@@ -32,6 +32,8 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "numpy>=1.20",
+    "ruff>=0.4",
+    "mypy>=1.0",
 ]
 jax = [
     "jax>=0.4",
@@ -39,8 +41,8 @@ jax = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jay/shapeguard"
-Repository = "https://github.com/jay/shapeguard"
+Homepage = "https://github.com/jayendra13/shapeguard"
+Repository = "https://github.com/jayendra13/shapeguard"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,3 +58,30 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "raise NotImplementedError",
 ]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "UP",     # pyupgrade
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shapeguard"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = false
+ignore_missing_imports = true

@@ -2,13 +2,14 @@
 Tests for JIT mode behavior.
 """
 
-import pytest
 from unittest.mock import patch
 
-from shapeguard import Dim, expects, config
-from shapeguard.errors import ShapeGuardError, DimensionMismatchError
-from shapeguard._compat import is_jax_tracing, is_jax_installed
-from tests.conftest import requires_numpy, requires_jax
+import pytest
+
+from shapeguard import Dim, config, expects
+from shapeguard._compat import is_jax_installed, is_jax_tracing
+from shapeguard.errors import DimensionMismatchError
+from tests.conftest import requires_jax, requires_numpy
 
 
 class TestJitDetection:

@@ -91,8 +91,6 @@ def is_jax_tracing() -> bool:
 
 def is_jax_installed() -> bool:
     """Check if JAX is available."""
-    try:
-        import jax
-        return True
-    except ImportError:
-        return False
+    from importlib.util import find_spec
+
+    return find_spec("jax") is not None

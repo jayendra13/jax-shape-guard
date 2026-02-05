@@ -5,7 +5,7 @@ Tests for ShapeContext manager.
 import pytest
 
 from shapeguard import Dim, ShapeContext
-from shapeguard.errors import UnificationError, RankMismatchError
+from shapeguard.errors import RankMismatchError, UnificationError
 from tests.conftest import requires_numpy
 
 

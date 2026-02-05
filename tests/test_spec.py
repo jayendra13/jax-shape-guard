@@ -5,12 +5,12 @@ Tests for shapeguard.spec module.
 import pytest
 
 from shapeguard.core import Dim, UnificationContext
-from shapeguard.spec import match_shape, check_shape, format_spec
 from shapeguard.errors import (
-    RankMismatchError,
     DimensionMismatchError,
+    RankMismatchError,
     UnificationError,
 )
+from shapeguard.spec import check_shape, format_spec, match_shape
 from tests.conftest import requires_numpy
 
 

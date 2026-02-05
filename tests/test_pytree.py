@@ -4,7 +4,7 @@ Tests for PyTree shape specifications.
 
 import pytest
 
-from shapeguard import Dim, expects, ShapeGuardError
+from shapeguard import Dim, ShapeGuardError, expects
 from tests.conftest import requires_numpy
 
 

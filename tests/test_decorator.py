@@ -4,13 +4,13 @@ Tests for shapeguard.decorator module.
 
 import pytest
 
-from shapeguard import Dim, expects, ShapeGuardError
+from shapeguard import Dim, ShapeGuardError, expects
 from shapeguard.errors import (
-    RankMismatchError,
     DimensionMismatchError,
+    RankMismatchError,
     UnificationError,
 )
-from tests.conftest import requires_numpy, requires_jax
+from tests.conftest import requires_jax, requires_numpy
 
 
 class TestExpectsDecorator:

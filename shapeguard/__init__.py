@@ -28,12 +28,12 @@ ML workflows:
         ctx.check(y, (m, k), "y")
 """
 
-from shapeguard.core import Dim, UnificationContext, Batch
-from shapeguard.errors import ShapeGuardError
-from shapeguard.decorator import expects
-from shapeguard.spec import check_shape
-from shapeguard.context import ShapeContext
 from shapeguard.config import config
+from shapeguard.context import ShapeContext
+from shapeguard.core import Batch, Dim, UnificationContext
+from shapeguard.decorator import expects
+from shapeguard.errors import ShapeGuardError
+from shapeguard.spec import check_shape
 
 __version__ = "0.2.0a1"
 

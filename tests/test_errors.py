@@ -6,10 +6,10 @@ import pytest
 
 from shapeguard.core import Dim
 from shapeguard.errors import (
+    DimensionMismatchError,
+    RankMismatchError,
     ShapeGuardError,
     UnificationError,
-    RankMismatchError,
-    DimensionMismatchError,
 )
 
 
