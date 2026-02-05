@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shapeguard"
-version = "0.1.0a1"
+version = "0.1.0b1"
 description = "Runtime shape contracts and diagnostics for NumPy and JAX"
 readme = "README.md"
 license = "MIT"

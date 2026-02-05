@@ -43,6 +43,54 @@ class Dim:
         return id(self)
 
 
+class Batch(Dim):
+    """
+    Special dimension for batch sizes in ML workflows.
+
+    Batch is a Dim that:
+    - Has a default name "batch" (or custom)
+    - Unifies across arguments within the same call
+    - Each function call can have a different batch size
+
+    Usage:
+        B = Batch()
+
+        @expects(x=(B, n, m), y=(B, m, k))
+        def layer(x, y):
+            # B unifies: x and y must have same batch size
+            ...
+
+        layer(x_32, y_32)  # B=32 for this call
+        layer(x_64, y_64)  # B=64 for this call (different, OK)
+    """
+
+    __slots__ = ()
+
+    def __init__(self, name: str = "batch") -> None:
+        super().__init__(name)
+
+
+# Sentinel for ellipsis in shape specs
+class _EllipsisType:
+    """Sentinel for variable-length leading dimensions in shape specs."""
+
+    __slots__ = ()
+
+    def __repr__(self) -> str:
+        return "..."
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, _EllipsisType) or other is ...
+
+    def __hash__(self) -> int:
+        return hash(...)
+
+
+# Singleton ellipsis instance for shape specs
+# Use this OR Python's ... (Ellipsis) in specs
+ELLIPSIS = _EllipsisType()
+
+
 @dataclass
 class Binding:
     """Record of a dimension binding with source info for error messages."""

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from shapeguard.core import Dim, UnificationContext
+from shapeguard.core import Dim, UnificationContext, ELLIPSIS, _EllipsisType
 from shapeguard.errors import (
     DimensionMismatchError,
     RankMismatchError,
@@ -16,8 +16,35 @@ from shapeguard._compat import get_shape
 
 
 # Type alias for shape specifications
-# Each element can be: int (exact match), Dim (symbolic), or None (wildcard)
-ShapeSpec = tuple[int | Dim | None, ...]
+# Each element can be: int (exact match), Dim (symbolic), None (wildcard),
+# or ... / ELLIPSIS (variable leading dims)
+ShapeSpec = tuple[int | Dim | None | _EllipsisType, ...]
+
+
+def _has_ellipsis(spec: ShapeSpec) -> bool:
+    """Check if spec contains an ellipsis."""
+    return any(s is ... or isinstance(s, _EllipsisType) for s in spec)
+
+
+def _split_ellipsis_spec(spec: ShapeSpec) -> tuple[ShapeSpec, ShapeSpec]:
+    """
+    Split a spec at the ellipsis into (before, after) parts.
+
+    Raises ValueError if more than one ellipsis.
+    """
+    ellipsis_indices = [
+        i for i, s in enumerate(spec)
+        if s is ... or isinstance(s, _EllipsisType)
+    ]
+
+    if len(ellipsis_indices) > 1:
+        raise ValueError("Shape spec cannot contain more than one ellipsis")
+
+    if not ellipsis_indices:
+        return spec, ()
+
+    idx = ellipsis_indices[0]
+    return spec[:idx], spec[idx + 1:]
 
 
 def match_shape(
@@ -31,7 +58,7 @@ def match_shape(
 
     Args:
         actual: The actual shape to check
-        spec: The shape specification
+        spec: The shape specification (can include ... for variable dims)
         ctx: Unification context for tracking dimension bindings
         source: Description of where this shape came from (for error messages)
 
@@ -39,8 +66,40 @@ def match_shape(
         RankMismatchError: If the number of dimensions doesn't match
         DimensionMismatchError: If a concrete dimension doesn't match
         UnificationError: If a symbolic dimension conflicts with prior binding
+
+    Examples:
+        match_shape((3, 4), (n, m), ctx, "x")       # exact rank match
+        match_shape((2, 3, 4), (..., n, m), ctx, "x")  # ellipsis matches (2,)
+        match_shape((3, 4), (..., n, m), ctx, "x")     # ellipsis matches ()
     """
-    # Check rank
+    # Handle ellipsis in spec
+    if _has_ellipsis(spec):
+        before, after = _split_ellipsis_spec(spec)
+        required_dims = len(before) + len(after)
+
+        if len(actual) < required_dims:
+            raise RankMismatchError(
+                expected_rank=f"{required_dims}+",  # "2+" means at least 2
+                actual_rank=len(actual),
+                expected_shape=spec,
+                actual_shape=actual,
+                bindings=ctx.format_bindings(),
+            )
+
+        # Match the 'before' part (leading fixed dims)
+        for i, spec_dim in enumerate(before):
+            _match_dim(actual[i], spec_dim, i, actual, spec, ctx, source)
+
+        # Match the 'after' part (trailing fixed dims)
+        # These align from the end
+        offset = len(actual) - len(after)
+        for i, spec_dim in enumerate(after):
+            actual_idx = offset + i
+            _match_dim(actual[actual_idx], spec_dim, actual_idx, actual, spec, ctx, source)
+
+        return
+
+    # No ellipsis: require exact rank match
     if len(actual) != len(spec):
         raise RankMismatchError(
             expected_rank=len(spec),
@@ -51,34 +110,47 @@ def match_shape(
         )
 
     # Check each dimension
-    for i, (actual_dim, spec_dim) in enumerate(zip(actual, spec)):
-        dim_source = f"{source}[{i}]"
+    for i, spec_dim in enumerate(spec):
+        _match_dim(actual[i], spec_dim, i, actual, spec, ctx, source)
 
-        if spec_dim is None:
-            # Wildcard: accept any value
-            continue
 
-        elif isinstance(spec_dim, Dim):
-            # Symbolic dimension: unify with context
-            ctx.bind(spec_dim, actual_dim, dim_source)
+def _match_dim(
+    actual_dim: int,
+    spec_dim: int | Dim | None,
+    index: int,
+    actual_shape: tuple[int, ...],
+    spec: ShapeSpec,
+    ctx: UnificationContext,
+    source: str,
+) -> None:
+    """Match a single dimension against its spec."""
+    dim_source = f"{source}[{index}]"
 
-        elif isinstance(spec_dim, int):
-            # Concrete dimension: must match exactly
-            if actual_dim != spec_dim:
-                raise DimensionMismatchError(
-                    dim_index=i,
-                    expected_value=spec_dim,
-                    actual_value=actual_dim,
-                    expected_shape=spec,
-                    actual_shape=actual,
-                    bindings=ctx.format_bindings(),
-                )
+    if spec_dim is None:
+        # Wildcard: accept any value
+        return
 
-        else:
-            raise TypeError(
-                f"Invalid spec element at position {i}: {spec_dim!r} "
-                f"(expected int, Dim, or None)"
+    elif isinstance(spec_dim, Dim):
+        # Symbolic dimension: unify with context
+        ctx.bind(spec_dim, actual_dim, dim_source)
+
+    elif isinstance(spec_dim, int):
+        # Concrete dimension: must match exactly
+        if actual_dim != spec_dim:
+            raise DimensionMismatchError(
+                dim_index=index,
+                expected_value=spec_dim,
+                actual_value=actual_dim,
+                expected_shape=spec,
+                actual_shape=actual_shape,
+                bindings=ctx.format_bindings(),
             )
+
+    else:
+        raise TypeError(
+            f"Invalid spec element at position {index}: {spec_dim!r} "
+            f"(expected int, Dim, None, or ...)"
+        )
 
 
 def check_shape(
@@ -130,9 +202,11 @@ def check_shape(
 def format_spec(spec: ShapeSpec) -> str:
     """Format a shape spec for display in error messages."""
 
-    def fmt_dim(d: int | Dim | None) -> str:
+    def fmt_dim(d: int | Dim | None | _EllipsisType) -> str:
         if d is None:
             return "*"
+        elif d is ... or isinstance(d, _EllipsisType):
+            return "..."
         elif isinstance(d, Dim):
             return d.name
         else:

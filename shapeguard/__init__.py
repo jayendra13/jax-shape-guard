@@ -9,19 +9,42 @@ Basic usage:
     @expects(x=(n, m), y=(m,))
     def forward(x, y):
         return x @ y
+
+ML workflows:
+    from shapeguard import Batch, ShapeContext
+
+    B = Batch()
+
+    @expects(x=(B, n, m))
+    def layer(x): ...
+
+    # Ellipsis for variable leading dims
+    @expects(x=(..., n, m))
+    def normalize(x): ...
+
+    # Grouped checks
+    with ShapeContext() as ctx:
+        ctx.check(x, (n, m), "x")
+        ctx.check(y, (m, k), "y")
 """
 
-from shapeguard.core import Dim, UnificationContext
+from shapeguard.core import Dim, UnificationContext, Batch
 from shapeguard.errors import ShapeGuardError
 from shapeguard.decorator import expects
 from shapeguard.spec import check_shape
+from shapeguard.context import ShapeContext
 
-__version__ = "0.1.0a1"
+__version__ = "0.1.0b1"
 
 __all__ = [
+    # Core
     "Dim",
+    "Batch",
     "UnificationContext",
-    "ShapeGuardError",
+    # Validation
     "expects",
     "check_shape",
+    "ShapeContext",
+    # Errors
+    "ShapeGuardError",
 ]
