@@ -43,8 +43,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jayendra13/shapeguard"
-Repository = "https://github.com/jayendra13/shapeguard"
+Homepage = "https://github.com/jayendra13/shape-guard"
+Repository = "https://github.com/jayendra13/shape-guard"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

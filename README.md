@@ -1,5 +1,11 @@
 # ShapeGuard
 
+[![Tests](https://github.com/jayendra13/shape-guard/actions/workflows/test.yml/badge.svg)](https://github.com/jayendra13/shape-guard/actions/workflows/test.yml)
+[![Lint](https://github.com/jayendra13/shape-guard/actions/workflows/lint.yml/badge.svg)](https://github.com/jayendra13/shape-guard/actions/workflows/lint.yml)
+[![PyPI version](https://img.shields.io/pypi/v/shapeguard.svg)](https://pypi.org/project/shapeguard/)
+[![Python versions](https://img.shields.io/pypi/pyversions/shapeguard.svg)](https://pypi.org/project/shapeguard/)
+[![License](https://img.shields.io/github/license/jayendra13/shape-guard.svg)](https://github.com/jayendra13/shape-guard/blob/main/LICENSE)
+
 Runtime shape contracts and diagnostics for NumPy and JAX.
 
 ## Installation
