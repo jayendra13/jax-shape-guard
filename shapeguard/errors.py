@@ -144,3 +144,41 @@ class DimensionMismatchError(ShapeGuardError):
             reason=reason,
             bindings=bindings,
         )
+
+
+class BroadcastError(ShapeGuardError):
+    """Raised when shapes cannot be broadcast together."""
+
+    def __init__(
+        self,
+        shapes: list[tuple[int, ...]],
+        dim_index: int,
+        dim_values: list[int],
+        *,
+        function: str | None = None,
+    ) -> None:
+        self.shapes = shapes
+        self.dim_index = dim_index
+        self.dim_values = dim_values
+
+        # Format shapes for message
+        values_str = ", ".join(str(v) for v in dim_values)
+
+        reason = (
+            f"cannot broadcast dimension {dim_index}: "
+            f"sizes {values_str} are incompatible (must be equal or 1)"
+        )
+
+        super().__init__(
+            reason,
+            function=function,
+            reason=reason,
+        )
+
+    def __str__(self) -> str:
+        shapes_str = ", ".join(str(s) for s in self.shapes)
+        lines = [f"BroadcastError: Cannot broadcast shapes {shapes_str}"]
+        if self.function:
+            lines.append(f"  function: {self.function}")
+        lines.append(f"  reason:   {self.reason}")
+        return "\n".join(lines)

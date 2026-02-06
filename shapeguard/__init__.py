@@ -28,11 +28,12 @@ ML workflows:
         ctx.check(y, (m, k), "y")
 """
 
+from shapeguard.broadcast import broadcast_shape, explain_broadcast
 from shapeguard.config import config
 from shapeguard.context import ShapeContext
 from shapeguard.core import Batch, Dim, UnificationContext
 from shapeguard.decorator import expects
-from shapeguard.errors import ShapeGuardError
+from shapeguard.errors import BroadcastError, ShapeGuardError
 from shapeguard.spec import check_shape
 
 __version__ = "0.2.0a1"
@@ -46,8 +47,12 @@ __all__ = [
     "expects",
     "check_shape",
     "ShapeContext",
+    # Broadcasting
+    "broadcast_shape",
+    "explain_broadcast",
     # Configuration
     "config",
     # Errors
     "ShapeGuardError",
+    "BroadcastError",
 ]
