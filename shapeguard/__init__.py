@@ -36,7 +36,7 @@ from shapeguard.decorator import contract, ensures, expects
 from shapeguard.errors import BroadcastError, OutputShapeError, ShapeGuardError
 from shapeguard.spec import check_shape
 
-__version__ = "0.2.0a1"
+__version__ = "0.3.0"
 
 __all__ = [
     # Core
