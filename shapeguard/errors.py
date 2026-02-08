@@ -146,6 +146,30 @@ class DimensionMismatchError(ShapeGuardError):
         )
 
 
+class OutputShapeError(ShapeGuardError):
+    """Raised when a function's return value has the wrong shape."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        function: str | None = None,
+        expected: Any = None,
+        actual: Any = None,
+        reason: str | None = None,
+        bindings: str | None = None,
+    ) -> None:
+        super().__init__(
+            message,
+            function=function,
+            argument="result",
+            expected=expected,
+            actual=actual,
+            reason=reason,
+            bindings=bindings,
+        )
+
+
 class BroadcastError(ShapeGuardError):
     """Raised when shapes cannot be broadcast together."""
 

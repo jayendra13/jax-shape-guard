@@ -13,7 +13,7 @@ from typing import Any, TypeVar
 from shapeguard._compat import get_shape, is_array, is_jax_tracing
 from shapeguard.config import JitMode, config
 from shapeguard.core import UnificationContext
-from shapeguard.errors import ShapeGuardError
+from shapeguard.errors import OutputShapeError, ShapeGuardError
 from shapeguard.spec import ShapeSpec, match_shape
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -81,6 +81,80 @@ def _check_pytree(
         raise TypeError(
             f"Invalid spec for {source}: {spec!r}. Expected tuple (shape) or dict (pytree)."
         )
+
+
+def _is_output_tuple_spec(spec: Any) -> bool:
+    """Check if spec is a tuple-of-specs (tuple output) vs a flat shape spec."""
+    if not isinstance(spec, tuple) or not spec:
+        return False
+    return isinstance(spec[0], (tuple, dict, list))
+
+
+def _check_output(
+    output: Any,
+    spec: Any,
+    ctx: UnificationContext,
+    fn_name: str,
+) -> None:
+    """
+    Validate a function's return value against an output spec.
+
+    Supports:
+    - Single array: spec is a flat shape tuple e.g. (n, k)
+    - Tuple of arrays: spec is a tuple of shape tuples e.g. ((n, m), (n,))
+    - Dict of arrays: spec is a dict e.g. {"logits": (B, vocab), "h": (B, D)}
+    - Scalar: spec is () (empty tuple)
+    """
+    try:
+        if isinstance(spec, dict):
+            _check_pytree(output, spec, ctx, "result", fn_name)
+        elif _is_output_tuple_spec(spec):
+            if not isinstance(output, (tuple, list)):
+                raise OutputShapeError(
+                    f"Expected tuple output from {fn_name}, got {type(output).__name__}",
+                    function=fn_name,
+                    expected=f"tuple of {len(spec)} arrays",
+                    actual=type(output).__name__,
+                )
+            if len(output) != len(spec):
+                raise OutputShapeError(
+                    f"Expected {len(spec)} outputs from {fn_name}, got {len(output)}",
+                    function=fn_name,
+                    expected=f"tuple of {len(spec)}",
+                    actual=f"tuple of {len(output)}",
+                )
+            for i, (elem, elem_spec) in enumerate(zip(output, spec, strict=True)):
+                source = f"result[{i}]"
+                if isinstance(elem_spec, dict):
+                    _check_pytree(elem, elem_spec, ctx, source, fn_name)
+                else:
+                    if not is_array(elem):
+                        raise OutputShapeError(
+                            f"Expected array for {source}, got {type(elem).__name__}",
+                            function=fn_name,
+                            expected=elem_spec,
+                            actual=type(elem).__name__,
+                        )
+                    actual = get_shape(elem)
+                    match_shape(actual, elem_spec, ctx, source)
+        else:
+            # Single array spec
+            if not is_array(output):
+                raise OutputShapeError(
+                    f"Expected array output from {fn_name}, got {type(output).__name__}",
+                    function=fn_name,
+                    expected=spec,
+                    actual=type(output).__name__,
+                )
+            actual = get_shape(output)
+            match_shape(actual, spec, ctx, "result")
+    except ShapeGuardError as e:
+        e.function = fn_name
+        if e.argument is None:
+            e.argument = "result"
+        if e.bindings is None:
+            e.bindings = ctx.format_bindings()
+        raise
 
 
 def expects(
@@ -201,10 +275,196 @@ def expects(
                     else:
                         raise
 
+            # Check if @ensures is stacked — use shared context for output
+            ensures_spec = getattr(fn, "__shapeguard_ensures__", None)
+            if ensures_spec is not None:
+                # Call the original unwrapped function, bypassing ensures wrapper
+                original_fn = getattr(fn, "__wrapped__", fn)
+                result = original_fn(*args, **kwargs)
+                _check_output(result, ensures_spec, ctx, fn_name)
+                return result
+
             return fn(*args, **kwargs)
 
         # Attach metadata for introspection
         wrapper.__shapeguard_specs__ = shape_specs  # type: ignore
+        wrapper.__shapeguard_jit_mode__ = jit_mode  # type: ignore
+
+        return wrapper  # type: ignore
+
+    return decorator
+
+
+def ensures(
+    *,
+    result: Any,
+    jit_mode: JitMode | None = None,
+) -> Callable[[F], F]:
+    """
+    Decorator to validate output shapes on function return.
+
+    When stacked with @expects (expects on top), bindings from input validation
+    carry over to output validation via a shared UnificationContext.
+
+    Args:
+        result: Shape spec for the return value. Can be:
+            - A shape tuple for a single array: (n, k)
+            - A tuple of shape tuples for tuple output: ((n, m), (n,))
+            - A dict of shape specs for dict output: {"logits": (B, V), "h": (B, D)}
+            - An empty tuple () for scalar output
+        jit_mode: Override global config.jit_mode for this function.
+
+    Example:
+        @expects(a=(n, m), b=(m, k))
+        @ensures(result=(n, k))
+        def matmul(a, b):
+            return a @ b
+    """
+
+    def decorator(fn: F) -> F:
+        fn_name = getattr(fn, "__qualname__", str(fn))
+
+        @functools.wraps(fn)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # Determine effective JIT mode
+            effective_mode = jit_mode if jit_mode is not None else config.jit_mode
+
+            # Check if we should skip validation
+            if effective_mode == "skip" and is_jax_tracing():
+                return fn(*args, **kwargs)
+
+            output = fn(*args, **kwargs)
+
+            ctx = UnificationContext()
+
+            try:
+                _check_output(output, result, ctx, fn_name)
+            except ShapeGuardError as e:
+                if effective_mode == "warn" and is_jax_tracing():
+                    logger.warning(
+                        "ShapeGuard output validation failed in %s: %s",
+                        fn_name,
+                        e.reason or str(e),
+                    )
+                    return output
+                raise
+
+            return output
+
+        # Mark this wrapper so @expects can detect it
+        wrapper.__shapeguard_ensures__ = result  # type: ignore
+
+        return wrapper  # type: ignore
+
+    return decorator
+
+
+def contract(
+    *,
+    inputs: dict[str, PyTreeSpec],
+    output: Any,
+    jit_mode: JitMode | None = None,
+) -> Callable[[F], F]:
+    """
+    Combined input + output validation in a single decorator.
+
+    Syntactic sugar for @expects + @ensures with a shared UnificationContext.
+
+    Args:
+        inputs: Mapping from argument names to shape specifications.
+        output: Shape spec for the return value (same format as @ensures).
+        jit_mode: Override global config.jit_mode for this function.
+
+    Example:
+        @contract(inputs={"a": (n, m), "b": (m, k)}, output=(n, k))
+        def matmul(a, b):
+            return a @ b
+    """
+
+    def decorator(fn: F) -> F:
+        sig = inspect.signature(fn)
+        fn_name = fn.__qualname__
+
+        # Validate that all spec keys are valid argument names
+        param_names = set(sig.parameters.keys())
+        for arg_name in inputs:
+            if arg_name not in param_names:
+                raise ValueError(
+                    f"@contract: '{arg_name}' is not a parameter of {fn_name}. "
+                    f"Valid parameters: {sorted(param_names)}"
+                )
+
+        @functools.wraps(fn)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            # Determine effective JIT mode
+            effective_mode = jit_mode if jit_mode is not None else config.jit_mode
+
+            # Check if we should skip validation
+            if effective_mode == "skip" and is_jax_tracing():
+                return fn(*args, **kwargs)
+
+            # Bind arguments to parameter names
+            try:
+                bound = sig.bind(*args, **kwargs)
+                bound.apply_defaults()
+            except TypeError:
+                return fn(*args, **kwargs)
+
+            # Single shared context for inputs and output
+            ctx = UnificationContext()
+
+            # Validate inputs
+            for arg_name, spec in inputs.items():
+                if arg_name not in bound.arguments:
+                    continue
+
+                value = bound.arguments[arg_name]
+
+                try:
+                    if isinstance(spec, dict):
+                        _check_pytree(value, spec, ctx, arg_name, fn_name)
+                    else:
+                        if not is_array(value):
+                            continue
+                        actual = get_shape(value)
+                        match_shape(actual, spec, ctx, arg_name)
+
+                except ShapeGuardError as e:
+                    e.function = fn_name
+                    if e.argument is None:
+                        e.argument = arg_name
+                    if e.bindings is None:
+                        e.bindings = ctx.format_bindings()
+
+                    if effective_mode == "warn" and is_jax_tracing():
+                        logger.warning(
+                            "ShapeGuard validation failed in %s: %s",
+                            fn_name,
+                            e.reason or str(e),
+                        )
+                        continue
+                    else:
+                        raise
+
+            # Call function and validate output
+            result = fn(*args, **kwargs)
+
+            try:
+                _check_output(result, output, ctx, fn_name)
+            except ShapeGuardError as e:
+                if effective_mode == "warn" and is_jax_tracing():
+                    logger.warning(
+                        "ShapeGuard output validation failed in %s: %s",
+                        fn_name,
+                        e.reason or str(e),
+                    )
+                    return result
+                raise
+
+            return result
+
+        wrapper.__shapeguard_specs__ = inputs  # type: ignore
+        wrapper.__shapeguard_output_spec__ = output  # type: ignore
         wrapper.__shapeguard_jit_mode__ = jit_mode  # type: ignore
 
         return wrapper  # type: ignore
