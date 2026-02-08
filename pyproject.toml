@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "shapeguard"
+name = "jax-shapeguard"
 version = "0.3.0"
 description = "Runtime shape contracts and diagnostics for NumPy and JAX"
 readme = "README.md"
