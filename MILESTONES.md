@@ -178,9 +178,9 @@ def matmul(a, b):
 Domain-specific helpers for common ML patterns.
 
 ### Deliverables
-- [ ] Pre-defined dims: `B`, `T`, `C`, `H`, `W`, `D`
-- [ ] `attention_shapes()` helper
-- [ ] `conv_output_shape()` calculator
+- [x] Pre-defined dims: `B`, `T`, `C`, `H`, `W`, `D`
+- [x] `attention_shapes()` helper
+- [x] `conv_output_shape()` calculator
 
 ### API Additions
 ```python
@@ -237,5 +237,5 @@ verify_contract(matmul, samples=100)
 | 3. JAX Integration | v0.2 | ✅ Complete (92% coverage) |
 | 4. Broadcasting | v0.2 | ✅ Complete |
 | 5. Output Contracts | v0.3 | ✅ Complete (91% coverage) |
-| 6. ML Helpers | v0.3 | 🔲 Not started |
+| 6. ML Helpers | v0.3 | ✅ Complete |
 | 7. Testing Utils | v0.4 | 🔲 Not started |

@@ -26,6 +26,15 @@ ML workflows:
     with ShapeContext() as ctx:
         ctx.check(x, (n, m), "x")
         ctx.check(y, (m, k), "y")
+
+ML helpers (see ``shapeguard.ml``):
+    from shapeguard.ml import B, T, D, attention_shapes, conv_output_shape
+
+    @expects(x=(B, T, D))
+    def transformer_layer(x): ...
+
+    @expects(**attention_shapes(B, heads, seq_q, seq_k, d_k))
+    def attention(q, k, v): ...
 """
 
 from shapeguard.broadcast import broadcast_shape, explain_broadcast
