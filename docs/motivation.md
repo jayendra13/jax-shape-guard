@@ -1,6 +1,6 @@
 # Why ShapeGuard?
 
-Shape bugs are among the most frustrating errors in numerical computing. They're silent, late, and cryptic. This page shows real JAX/NumPy pain points — drawn from [40+ JAX GitHub issues](https://github.com/google/jax/issues) — and how ShapeGuard addresses each category.
+Shape bugs are among the most frustrating errors in numerical computing. They're silent, late, and cryptic. This page shows real JAX/NumPy pain points — drawn from [40 JAX GitHub issues](https://github.com/jayendra13/jax-shape-guard/blob/main/JAX_ISSUES_ANALYSIS.md) — and how ShapeGuard addresses each category.
 
 ---
 
