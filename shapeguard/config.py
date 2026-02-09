@@ -20,9 +20,11 @@ class Config:
             - "skip": Skip validation entirely under JIT
 
     Example:
+        ```python
         from shapeguard import config
 
         config.jit_mode = "skip"  # Disable checks under JIT globally
+        ```
     """
 
     __slots__ = ("_jit_mode",)

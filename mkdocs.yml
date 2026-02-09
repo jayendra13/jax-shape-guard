@@ -1,0 +1,76 @@
+site_name: ShapeGuard
+site_description: Runtime shape contracts and diagnostics for NumPy and JAX
+site_url: https://jayendra13.github.io/jax-shape-guard/
+repo_url: https://github.com/jayendra13/jax-shape-guard
+repo_name: jayendra13/jax-shape-guard
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - toc.follow
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
+            heading_level: 3
+            members_order: source
+            docstring_style: google
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Guide:
+    - Shape Contracts: guide/shape-contracts.md
+    - Batch & Ellipsis: guide/batch-and-ellipsis.md
+    - Broadcasting: guide/broadcasting.md
+    - ML Helpers: guide/ml-helpers.md
+  - Concepts:
+    - Unification: concepts/unification.md
+    - JIT Modes: concepts/jit-modes.md
+  - API Reference:
+    - Core: reference/core.md
+    - Decorators: reference/decorators.md
+    - Validation: reference/validation.md
+    - Broadcasting: reference/broadcasting.md
+    - ML Helpers: reference/ml.md
+    - Errors: reference/errors.md
+    - Configuration: reference/config.md

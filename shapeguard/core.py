@@ -52,7 +52,8 @@ class Batch(Dim):
     - Unifies across arguments within the same call
     - Each function call can have a different batch size
 
-    Usage:
+    Example:
+        ```python
         B = Batch()
 
         @expects(x=(B, n, m), y=(B, m, k))
@@ -62,6 +63,7 @@ class Batch(Dim):
 
         layer(x_32, y_32)  # B=32 for this call
         layer(x_64, y_64)  # B=64 for this call (different, OK)
+        ```
     """
 
     __slots__ = ()

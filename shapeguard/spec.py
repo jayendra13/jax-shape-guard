@@ -75,9 +75,11 @@ def match_shape(
         UnificationError: If a symbolic dimension conflicts with prior binding
 
     Examples:
+        ```python
         match_shape((3, 4), (n, m), ctx, "x")       # exact rank match
         match_shape((2, 3, 4), (..., n, m), ctx, "x")  # ellipsis matches (2,)
         match_shape((3, 4), (..., n, m), ctx, "x")     # ellipsis matches ()
+        ```
     """
     # Handle ellipsis in spec
     if _has_ellipsis(spec):
@@ -186,11 +188,13 @@ def check_shape(
         ShapeGuardError: If shape doesn't match specification
 
     Example:
+        ```python
         from shapeguard import check_shape, Dim
 
         n = Dim("n")
         check_shape(x, (n, 128), name="input")
         check_shape(y, (n, 64), name="output")  # n must match
+        ```
     """
     if ctx is None:
         ctx = UnificationContext()

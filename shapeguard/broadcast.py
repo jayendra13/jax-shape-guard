@@ -79,12 +79,14 @@ def broadcast_shape(*shapes: tuple[int, ...] | Any) -> tuple[int, ...]:
         ValueError: If no shapes are provided
 
     Example:
+        ```python
         >>> broadcast_shape((3, 1), (1, 4))
         (3, 4)
         >>> broadcast_shape((2, 3, 4), (4,))
         (2, 3, 4)
         >>> broadcast_shape(arr1, arr2)  # works with arrays too
         (3, 4)
+        ```
     """
     if not shapes:
         raise ValueError("broadcast_shape requires at least one shape")
@@ -122,6 +124,7 @@ def explain_broadcast(*shapes: tuple[int, ...] | Any) -> str:
         Multi-line string explaining the broadcast process
 
     Example:
+        ```python
         >>> print(explain_broadcast((3, 1, 4), (5, 4)))
         Broadcasting (3, 1, 4) with (5, 4):
           Step 1: Align shapes from right
@@ -132,6 +135,7 @@ def explain_broadcast(*shapes: tuple[int, ...] | Any) -> str:
             dim -2: 1 → 5 (broadcast)
             dim -1: 4 = 4 (match)
           Result: (3, 5, 4)
+        ```
     """
     if not shapes:
         return "No shapes provided"

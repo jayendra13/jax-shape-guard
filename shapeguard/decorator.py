@@ -176,6 +176,7 @@ def expects(
         Decorator function
 
     Example:
+        ```python
         from shapeguard import Dim, expects
 
         n, m, k = Dim("n"), Dim("m"), Dim("k")
@@ -183,6 +184,7 @@ def expects(
         @expects(a=(n, m), b=(m, k))
         def matmul(a, b):
             return a @ b
+        ```
 
     Shape specifications can contain:
         - int: Exact dimension match (e.g., 128)
@@ -315,10 +317,12 @@ def ensures(
         jit_mode: Override global config.jit_mode for this function.
 
     Example:
+        ```python
         @expects(a=(n, m), b=(m, k))
         @ensures(result=(n, k))
         def matmul(a, b):
             return a @ b
+        ```
     """
 
     def decorator(fn: F) -> F:
@@ -376,9 +380,11 @@ def contract(
         jit_mode: Override global config.jit_mode for this function.
 
     Example:
+        ```python
         @contract(inputs={"a": (n, m), "b": (m, k)}, output=(n, k))
         def matmul(a, b):
             return a @ b
+        ```
     """
 
     def decorator(fn: F) -> F:

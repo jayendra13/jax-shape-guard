@@ -20,6 +20,7 @@ class ShapeContext:
     but aren't in a single decorated function.
 
     Example:
+        ```python
         from shapeguard import ShapeContext, Dim
 
         n, m, k = Dim("n"), Dim("m"), Dim("k")
@@ -32,10 +33,11 @@ class ShapeContext:
         # All checks passed, dimensions unified:
         print(ctx.bindings)  # {n: 3, m: 4, k: 5}
 
-    Can also be used without context manager:
+        # Can also be used without context manager:
         ctx = ShapeContext()
         ctx.check(x, (n, m), "x")
         ctx.check(y, (m, k), "y")
+        ```
     """
 
     def __init__(self) -> None:
