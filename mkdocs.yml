@@ -33,6 +33,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: ["."]
           options:
             show_source: false
             show_root_heading: true
