@@ -59,6 +59,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Why ShapeGuard?: motivation.md
   - Guide:
     - Shape Contracts: guide/shape-contracts.md
     - Batch & Ellipsis: guide/batch-and-ellipsis.md

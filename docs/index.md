@@ -51,6 +51,7 @@ ShapeGuard fixes this by:
 
 ## Quick links
 
+- [Why ShapeGuard?](motivation.md) — real-world JAX errors that ShapeGuard prevents
 - [Getting Started](getting-started.md) — installation and first steps
 - [Shape Contracts Guide](guide/shape-contracts.md) — core usage patterns
 - [Unification](concepts/unification.md) — how dimension matching works under the hood
