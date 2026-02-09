@@ -18,7 +18,6 @@ from shapeguard.ml import (
 )
 from tests.conftest import requires_numpy
 
-
 # ---------------------------------------------------------------------------
 # Pre-defined dimensions
 # ---------------------------------------------------------------------------
@@ -51,7 +50,8 @@ class TestPreDefinedDims:
 
     def test_singleton_identity(self):
         """Re-importing yields the same objects."""
-        from shapeguard.ml import B as B2, T as T2
+        from shapeguard.ml import B as B2
+        from shapeguard.ml import T as T2
 
         assert B is B2
         assert T is T2
